@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Subir Imagen de Radiografía{% endblock %}
+
+{% block content %}
+    <div class="bg-white bg-opacity-70 backdrop-filter backdrop-blur-md p-6 rounded-lg shadow-lg w-full max-w-2xl mx-auto h-auto flex flex-col items-center">
+        <h2 class="text-2xl font-semibold text-gray-800 text-center mb-6">Subir Imagen</h2>
+        
+        {% load extras %}
+        
+        <form method="POST" enctype="multipart/form-data" class="space-y-6 w-full" id="uploadForm">
+            {% csrf_token %}
+            
+            <div class="flex flex-col items-center w-full">
+                <label for="paciente_nombre" class="block text-sm font-medium text-gray-700">Nombre del Paciente</label>
+                <input type="text" name="paciente_nombre" id="paciente_nombre" class="mt-1 block w-80 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200" required>
+            </div>
+
+            <div class="flex flex-col items-center w-full">
+                <label for="titulo" class="block text-sm font-medium text-gray-700">Nombre de la Radiografía</label>
+                {{ form.titulo|add_class:"mt-1 block w-80 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200" }}
+            </div>
+
+            <div class="flex mt-6 items-center justify-center w-full">
+                <div class="mr-6 flex flex-col items-center">
+                    <img id="imagenPreview" src="/app/Hernia/static/images/usuario-logo3.png" alt="Vista previa de la imagen" class="w-48 h-auto rounded-md border border-gray-300 shadow-md" />
+                    
+                    <div class="mt-4">
+                        <label for="imagen" class="block text-sm font-medium text-gray-700">Seleccionar Imagen</label>
+                        <div class="relative">
+                            <input type="file" name="imagen" id="id_imagen" class="hidden" accept="image/*" />
+                            <label for="id_imagen" class="mt-1 block w-full px-3 py-2 text-center bg-blue-500 text-white rounded-md cursor-pointer hover:bg-blue-600 transition duration-200">
+                                Seleccionar Imagen
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col space-y-4">
+                    <div>
+                        <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded-md font-semibold hover:bg-blue-600 hover:scale-105 transition-transform duration-300 transform active:scale-95 w-full shadow-md" id="submitBtn">
+                            Subir
+                        </button>
+                    </div>
+                    <div>
+                        <a href="{% url 'index' %}" class="bg-gray-300 text-gray-800 py-2 px-4 rounded-md font-semibold hover:bg-gray-400 hover:scale-105 transition-transform duration-300 transform active:scale-95 w-full text-center inline-block">
+                            Regresar
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div id="error-message" class="text-red-500 text-center mt-4 hidden"></div> <!-- Mensaje de error -->
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/app/Hernia/static/js/subir_imagen.js"></script>
+
+    <script>
+        document.getElementById("id_imagen").addEventListener("change", function(event) {
+            var reader = new FileReader();
+            reader.onload = function(){
+                var output = document.getElementById('imagenPreview');
+                output.src = reader.result;
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        });
+
+        document.getElementById("uploadForm").addEventListener("submit", function(event) {
+            var imagenInput = document.getElementById("id_imagen");
+            var errorMessage = document.getElementById("error-message");
+
+            if (imagenInput.files.length === 0 || imagenInput.files[0].name === "usuario-logo3.png") {
+                event.preventDefault();
+                errorMessage.textContent = "Por favor, selecciona una imagen válida antes de subir.";
+                errorMessage.classList.remove("hidden");
+            } else {
+                errorMessage.classList.add("hidden");
+            }
+        });
+    </script>
+{% endblock %}

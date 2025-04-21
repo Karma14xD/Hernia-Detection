@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Resultados Probabilísticos{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="/app/Hernia/static/styles/resultados.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<div class="container mx-auto mt-10 max-w-3xl">
+    <h1 class="title text-center text-3xl font-bold text-black-500 p-4 mb-6 bg-white bg-opacity-50 backdrop-filter backdrop-blur-md rounded-lg shadow-md">
+        Resultados Probabilísticos
+    </h1>
+
+    <div class="flex gap-6">
+        <!-- Sección de Probabilidades -->
+        <div class="card bg-white bg-opacity-50 backdrop-filter backdrop-blur-md rounded-lg shadow-md p-4 flex-1">
+            <h2 class="text-xl font-semibold text-gray-1000 mb-4">Probabilidades</h2>
+            <ul class="typing-effect list-none p-0 m-0 text-center">
+                {% if grupo %}
+                    {% if grupo == "Hernia" %}
+                        <li class="text-red-500">{{ grupo }}: {{ porcentaje }}% de confianza</li>
+                    {% elif grupo == "Sin Hernia" %}
+                        <li class="text-green-500">{{ grupo }}: {{ porcentaje }}% de confianza</li>
+                    {% else %}
+                        <li class="no-data-message text-red-500">{{ grupo }}</li>
+                    {% endif %}
+                {% else %}
+                    <li class="no-data-message text-red-500">No hay datos cargados</li>
+                {% endif %}
+            </ul>
+        </div>
+
+        <!-- Sección de Imagen -->
+        <div class="card-andres bg-white bg-opacity-50 backdrop-filter backdrop-blur-md rounded-lg shadow-md p-4 flex-1">
+            <div id="carousel" class="relative">
+                <div class="absolute top-2 right-2 flex gap-2 z-10">
+                    <button id="zoom-in" class="bg-white p-2 rounded-full shadow-md hover:bg-gray-200">
+                        <i class="fas fa-search-plus"></i>
+                    </button>
+                    <button id="zoom-out" class="bg-white p-2 rounded-full shadow-md hover:bg-gray-200">
+                        <i class="fas fa-search-minus"></i>
+                    </button>
+                </div>
+
+                <div class="overflow-auto" style="width: 100%; height: 400px;">
+                    <div id="image-container" style="position: relative;">
+                        <div id="carousel-images" class="carousel">
+                            <!-- Imagen Original -->
+                                <div class="image-wrapper">
+                                    <h3 class="text-center text-lg font-semibold">Imagen Original</h3>
+                                    {% if original_image_url %}
+                                        <img class="zoomable-image" src="{{ original_image_url }}" alt="Imagen Original" class="transition-transform duration-300" style="transform-origin: top left;">
+                                    {% else %}
+                                        <img class="zoomable-image" src="/app/Hernia/static/images/usuario-logo3.png" alt="Imagen por Defecto" class="transition-transform duration-300" style="transform-origin: top left;">
+                                    {% endif %}
+                                </div>
+                            <!-- Imagen Procesada -->
+                            <div class="image-wrapper">
+                                <h3 class="text-center text-lg font-semibold">Imagen con Detección</h3>
+                                {% if processed_image_url %}
+                                    <img class="zoomable-image" src="{{ processed_image_url }}" alt="Imagen Procesada" class="transition-transform duration-300" style="transform-origin: top left;">
+                                {% else %}
+                                    <img class="zoomable-image" src="/app/Hernia/static/images/usuario-logo3.png" alt="Imagen por Defecto (Procesada)" class="transition-transform duration-300" style="transform-origin: top left;">
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between mt-4">
+                    <button id="prev" class="bg-white p-2 rounded-full shadow-md hover:bg-gray-200">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <!-- Botón para regresar -->
+                    <div class="flex justify-center mt-6">
+                        <a href="{% url 'index' %}" class="bg-blue-500 text-white py-1 px-3 rounded-md font-semibold hover:bg-blue-600 hover:scale-105 transition-transform duration-300 transform active:scale-95">
+                            Regresar
+                        </a>
+                    </div>
+                    <button id="next" class="bg-white p-2 rounded-full shadow-md hover:bg-gray-200">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let scale = 1; // Escala de zoom
+    let currentZoomableImage; // Imagen actual en la que se aplica el zoom
+
+    // Función para aplicar el zoom
+    const applyTransform = () => {
+        if (currentZoomableImage) {
+            currentZoomableImage.style.transform = `scale(${scale})`;
+        }
+    };
+
+    // Eventos para zoom
+    document.getElementById('zoom-in').addEventListener('click', () => {
+        scale += 0.1; // Incrementar el zoom
+        applyTransform();
+    });
+
+    document.getElementById('zoom-out').addEventListener('click', () => {
+        scale = Math.max(scale - 0.1, 1); // Decrementar el zoom, mínimo 1
+        applyTransform();
+    });
+
+    // Carrusel de imágenes
+    let currentIndex = 0;
+    const images = document.querySelectorAll('#carousel-images .image-wrapper');
+    const totalImages = images.length;
+
+    const showImage = (index) => {
+        images.forEach((img, i) => {
+            img.style.display = i === index ? 'block' : 'none';
+        });
+        // Cambiar la imagen actual para el zoom
+        currentZoomableImage = images[index].querySelector('.zoomable-image');
+        scale = 1; // Reiniciar la escala al mostrar una nueva imagen
+        applyTransform(); // Aplicar transformaciones
+    };
+
+    document.getElementById('prev').addEventListener('click', () => {
+        currentIndex = (currentIndex - 1 + totalImages) % totalImages;
+        showImage(currentIndex);
+    });
+
+    document.getElementById('next').addEventListener('click', () => {
+        currentIndex = (currentIndex + 1) % totalImages;
+        showImage(currentIndex);
+    });
+
+    // Inicializar el carrusel mostrando la primera imagen
+    showImage(currentIndex);
+</script>
+
+{% endblock %}

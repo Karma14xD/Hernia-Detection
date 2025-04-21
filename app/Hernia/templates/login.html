@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@2.8.2/dist/alpine.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="/app/Hernia/static/styles/login.css">
+</head>
+<body class="bg-gray-100" id="body">
+    <!-- Contenedor del Interruptor de Modo Oscuro
+    <div class="fixed top-4 right-4 z-50">
+        <label class="switch">
+            <input type="checkbox" id="darkModeToggle">
+            <span class="slider"></span>
+        </label>
+    </div> -->
+
+    <!-- Contenido Principal -->
+    <div class="container mx-auto h-screen flex justify-center items-center">
+        <div class="bg-white bg-opacity-50 backdrop-filter backdrop-blur-md p-8 rounded-lg shadow-lg w-96"> <!-- Transparencia aplicada -->
+            <h2 class="text-2xl font-semibold text-gray-800 text-center mb-6">Iniciar Sesión</h2>
+
+            <form method="post" action="{% url 'login' %}" id="loginForm">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label for="username" class="block text-gray-1000">Nombre de Usuario:</label>
+                    <input type="text" id="username" name="username" required class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300">
+                </div>
+                <div class="mb-6">
+                    <label for="password" class="block text-gray-1000">Contraseña:</label>
+                    <input type="password" id="password" name="password" required class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300">
+                </div>
+                <div>
+                    <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md transition-transform transform hover:scale-105 duration-300">Ingresar</button>
+                </div>
+            </form>
+
+            <div class="mt-4 text-center">
+                <p class="text-gray-600">¿No tienes una cuenta?</p>
+                <a href="{% url 'register' %}" class="text-blue-600 hover:underline">Regístrate aquí</a>
+                <div class="mt-2">
+                    <a href="{% url 'password_reset' %}" class="text-blue-600 hover:underline">¿Olvidaste tu contraseña?</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtro de carga -->
+    <div class="overlay" id="loadingScreen">
+        <div class="text-center">
+            <div class="loader"></div>
+            <h1 class="text-2xl font-semibold mt-4">Iniciando sesión...</h1>
+            <p class="mt-2">Por favor, espere mientras se completa el proceso de inicio de sesión.</p>
+        </div>
+    </div>
+    <script src="/app/Hernia/static/js/login.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            const loadingScreen = document.getElementById('loadingScreen');
+        
+            loginForm.addEventListener('submit', function() {
+                loadingScreen.classList.add('show');
+            });
+        
+            // Mostrar mensajes solo si son errores
+            {% if messages %}
+                {% for message in messages %}
+                    {% if message.tags == 'error' %}
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: '{{ message }}',
+                        });
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        });
+        
+    </script>
+</body>
+</html>

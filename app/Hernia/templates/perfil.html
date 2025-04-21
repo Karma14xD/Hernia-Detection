@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Perfil de Usuario{% endblock %}
+
+{% block content %}
+<div class="container mx-auto mt-10 p-4 bg-white bg-opacity-50 backdrop-filter backdrop-blur-md shadow-md rounded-lg">
+    <h1 class="text-3xl font-bold text-gray-10000 text-center mb-6">Perfil de Usuario</h1>
+
+    <div class="flex justify-center mb-6">
+        {% if user.profile.profile_image %}
+            <img src="{{ user.profile.profile_image.url }}" alt="Foto de Perfil" class="w-32 h-32 rounded-full object-cover">
+        {% else %}
+            <img src="/app/Hernia/static/images/usuario-logo1.png" alt="Imagen por Defecto" class="w-32 h-32 rounded-full object-cover">
+        {% endif %}
+    </div>        
+
+    <div class="text-center mb-6">
+        <p class="text-xl font-semibold text-gray-700">
+            <span class="font-bold">Usuario:</span> {{ user.username }} - 
+            {% if user.is_superuser %}
+                <span class="text-red-500">Administrador</span>
+            {% else %}
+                <span class="text-green-500">Usuario</span>
+            {% endif %}
+        </p>
+        <p class="text-xl font-semibold text-gray-700"><span class="font-bold">Correo:</span> {{ user.email }}</p>
+        <p class="text-xl font-semibold text-gray-700"><span class="font-bold">Dirección:</span> {{ user.profile.address|default_if_none:'Sin Registrar' }}</p>
+        <p class="text-xl font-semibold text-gray-700"><span class="font-bold">Teléfono:</span> {{ user.profile.phone_number|default_if_none:'Sin Registrar' }}</p>
+        <p class="text-xl font-semibold text-gray-700"><span class="font-bold">Cédula:</span> {{ user.profile.cedula|default_if_none:'Sin Registrar' }}</p>
+    </div>
+
+    <form id="uploadForm" method="POST" enctype="multipart/form-data" class="flex flex-col items-center">
+        {% csrf_token %}
+        <input id="fileInput" type="file" name="profile_image" class="hidden" accept="image/*" onchange="handleFileSelection(event)">
+        <div class="flex space-x-4 mt-4">
+            <a href="{% url 'editar_perfil' %}" class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600">
+                Editar Perfil
+            </a>
+            <a href="{% url 'index' %}" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+                Volver
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

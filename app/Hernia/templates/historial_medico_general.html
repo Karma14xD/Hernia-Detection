@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Historial Medico{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="/app/Hernia/static/styles/resultados.css">
+<div class="mt-10 mx-auto max-w-4xl px-4">
+    <h2 class="text-xl font-bold mb-4 text-center">Historial Médico del Usuario</h2>
+
+    <table class="w-full bg-white bg-opacity-50 backdrop-filter backdrop-blur-md dark:bg-gray-1000 border border-gray-1000 dark:border-gray-1000 rounded-lg shadow-md">
+        <thead>
+            <tr class="bg-gray-1000 dark:bg-gray-1000 border-b border-gray-1000 dark:border-gray-1000">
+                <th class="py-2 px-4 text-left text-gray-1000 dark:text-gray-1000 text-center border-gray-1000 dark:border-gray-1000">Doctor</th>
+                <th class="py-2 px-4 text-left text-gray-1000 dark:text-gray-1000 text-center border-gray-1000 dark:border-gray-1000">Paciente</th>
+                <th class="py-2 px-4 text-left text-gray-1000 dark:text-gray-1000 text-center border-gray-1000 dark:border-gray-1000">Fecha</th>
+                <th class="py-2 px-4 text-left text-gray-1000 dark:text-gray-1000 text-center border-gray-1000 dark:border-gray-1000">Imagen</th>
+                <th class="py-2 px-4 text-left text-gray-1000 dark:text-gray-1000 text-center border-gray-1000 dark:border-gray-1000">Porcentaje</th>
+                <th class="py-2 px-4 text-left text-gray-1000 dark:text-gray-1000 text-center border-gray-1000 dark:border-gray-1000">Resultado</th>
+                <th class="py-2 px-4 text-left text-gray-1000 dark:text-gray-1000 text-center">Descargar PDF</th>
+                <th class="py-2 px-4 text-center text-gray-1000 dark:text-gray-1000 text-center">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in page_obj %}
+            <tr>
+                <td class="py-2 px-4 text-center">{{ item.user.username }}</td>
+                <td class="py-2 px-4 text-center">{{ item.paciente_nombre }}</td>
+                <td class="py-2 px-4 text-center">{{ item.fecha_imagen }}</td>
+                <td class="py-2 px-4 text-center">
+                    {% if item.imagen %}
+                        <img src="{{ item.imagen.url }}" alt="Imagen del historial" class="w-20 h-20 object-cover rounded-md">
+                    {% else %}
+                        No disponible
+                    {% endif %}
+                </td>
+                <td class="py-2 px-4 text-center">{{ item.porcentaje }}%</td>
+                <td class="py-2 px-4 text-center">{{ item.grupo }}</td>
+                <td class="py-2 px-4 text-center">
+                    <a href="{% url 'generar_pdf_fila' item.id %}" class="text-red-500 hover:underline">
+                        <i class="fas fa-file-pdf text-red-500"></i>
+                    </a>
+                </td>
+                <td class="py-2 px-4 text-center">
+                    <form method="POST" action="{% url 'eliminar_historial_gene' item.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="bg-red-500 text-white py-1 px-2 rounded-md hover:bg-red-600">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="py-2 px-6 text-center text-gray-1000 dark:text-gray-1000">No hay datos disponibles</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        
+    </table>
+
+    <!-- Paginación -->
+    <div class="mt-4 flex justify-center">
+        <div class="flex items-center space-x-2">
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <span class="px-3 py-1 bg-blue-500 text-white rounded">{{ num }}</span>
+                {% else %}
+                    <a href="?page={{ num }}" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Botones para descargar y regresar -->
+    <div class="flex justify-center mt-6 space-x-4">
+        <a href="{% url 'index' %}" class="bg-blue-500 text-white py-1 px-3 rounded-md font-semibold hover:bg-blue-600 hover:scale-105 transition-transform duration-300 transform active:scale-95">
+            Regresar
+        </a>
+        {% if page_obj %}
+            <a href="{% url 'generar_pdf_general' %}" class="bg-green-500 text-white py-1 px-3 rounded-md font-semibold hover:bg-green-600 hover:scale-105 transition-transform duration-300 transform active:scale-95">
+                Descargar PDF General
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
